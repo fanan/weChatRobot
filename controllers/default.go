@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"crypto/sha1"
+	"encoding/xml"
 	"fmt"
 	"github.com/astaxie/beego"
 	"io"
@@ -45,13 +46,20 @@ func (self *MainController) Get() {
 	self.Ctx.WriteString(self.GetString("echostr"))
 }
 
-// the Post method handles weChat messages sent by users
+// Post method handles weChat messages sent by users
 func (self *MainController) Post() {
 	c, err := ioutil.ReadAll(self.Ctx.Request.Body)
 	if err != nil {
 		beego.Error("read request error")
 		self.Abort("500")
 	}
-	self.Data["xml"] = HandleMessage(c)
+	msg := new(Message)
+	err = xml.Unmarshal(c, msg)
+	if err != nil {
+		beego.Error(err)
+		self.Abort("500")
+	}
+	returnMsg := msg.Handle()
+	self.Data["xml"] = &returnMsg
 	self.ServeXml()
 }

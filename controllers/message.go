@@ -40,6 +40,25 @@ type EventKey struct {
 	Data string `xml:",chardata"`
 }
 
-func HandleMessage(c []byte) (msg *Message) {
-	return msg
+func (self *Message) Handle() (respMsg Message) {
+	respMsg.FromUserName.Data = self.ToUserName.Data
+	respMsg.ToUserName.Data = self.FromUserName.Data
+	respMsg.MsgType.Data = TextType
+	switch self.MsgType.Data {
+	case TextType:
+		respMsg.Content.Data = self.HandleText()
+	case EventType:
+		respMsg.Content.Data = self.HandleEvent()
+	default:
+		respMsg.Content.Data = "not supported yet"
+	}
+	return respMsg
+}
+
+func (self *Message) HandleText() string {
+	return ""
+}
+
+func (self *Message) HandleEvent() string {
+	return ""
 }
